@@ -1,4 +1,5 @@
 CC=		clang13
+#CC=		gcc10
 CFLAGS=		-g -I.
 LDFLAGS=
 
@@ -8,7 +9,7 @@ COMPONENTS=	rseq
 
 all:		${PROG}
 
-${PROG}:	$(COMPONENTS:=.o) $(COMPONENTS:=.h)
+${PROG}:	${PROG}.c $(COMPONENTS:=.o) $(COMPONENTS:=.h)
 		${CC} -Wall -O0 ${CFLAGS} ${LDFLAGS} $(COMPONENTS:=.o) ${PROG}.c -o $@
 
 $(COMPONENTS:=.o):	$(COMPONENTS:=.c) $(COMPONENTS:=.h)
