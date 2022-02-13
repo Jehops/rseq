@@ -63,14 +63,18 @@ char ip2l(int a) {
   return('?');
 }
 
-void _fasta_ntaxa_nsites(FILE *seqfp, int *ntaxa, int *nsites) {
+void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl) {
 
   char cbuf;
 
+  *totnl=0;
   while( (cbuf = fgetc(seqfp)) != EOF ) {
     if ( cbuf == '>' ) {
       (*ntaxa)++;
-      while( (cbuf = fgetc(seqfp)) != '\n' );
+      while( (cbuf = fgetc(seqfp)) != '\n' ) {
+        if (cbuf != '\r')
+          (*totnl)++;
+      }
     }
     else if ( *ntaxa == 1 ) {
       if ( cbuf != '\n' && cbuf != '\r' ) {

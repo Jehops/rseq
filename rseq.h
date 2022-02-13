@@ -29,7 +29,7 @@ int l2ip(char c);
 
 char ip2l(int a);
 
-void _fasta_ntaxa_nsite(FILE *seqfp, int *ntaxa, int *nsites);
+void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl);
 
 void rseq_fasta(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
                 int **pn);
