@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -146,12 +147,72 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   for(int i=0; i<seqi; i++) {
     (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
   }
+  (*pn)[++curseq] = npi;
 
   return;
 }
 
-void rseq_rphy(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
-               int **pn) {
+/*
+ * Read a relaxed phylip alignment from the file pointed to by seqfp and store
+ * it in seq.  Amino acid values are determined from l2ip().  To retrieve the
+ * amino acid at site i for taxon j, use seq[i + j*nsites].
+ *
+ * ntaxa: number of taxa
+ * nsites: number of aa sites
+ * seq: aa sequence data
+ * names: All taxon ids in a flat character array.
+ * pn: pn[i] gives the starting index for ith taxon id
+
+ * Allocated with caller responsibility to free:
+ *   seq: nsites*ntaxa chars
+ *   names: total length all taxon ids chars
+ *   pn: ntaxa+1 integers
+ *
+ */
+void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
+               char **names, int **pn) {
+
+  char cbuf, lbuf[LBUFLEN];
+  char **tnames = 0; // temporary names array
+  int i = 0, tnamel = 0, npi=0; // tnamel: total name length
+
+  if (fscanf(seqfp, "%d %d", ntaxa, nsites) != 2) {
+    printf("FATAL: Failed to read the phylip header.\n");
+    return;
+  }
+
+  tnames = malloc((*ntaxa) * sizeof(char*));
+  *seq = malloc((*nsites)*(*ntaxa) * sizeof(int));
+  *pn = malloc( (*ntaxa+1) * sizeof(int));
+
+  for (int j=0, namel=0; j<*ntaxa; j++) {
+    fscanf(seqfp, "%s", lbuf); // taxon id
+    namel = strlen(lbuf);
+    tnames[j] = malloc(namel+1 * sizeof(char));
+    tnamel+=namel;
+    strcpy(tnames[j], lbuf);
+
+    // sequence
+    i=0;
+    while( (cbuf = fgetc(seqfp)) != '\n' ) {
+      if( ! isspace(cbuf) ) {
+        (*seq)[i + j*(*nsites)] = l2ip(cbuf);
+        i++;
+      }
+    }
+  }
+
+  *names = malloc(tnamel+1 * sizeof(char));
+  for (int j=0; j<*ntaxa; j++) {
+    strcpy((*names)+npi, tnames[j]);
+    (*pn)[j] = npi;
+    npi+=strlen(tnames[j]);
+    free(tnames[j]);
+  }
+  (*pn)[*ntaxa] = npi;
+
+  free(tnames);
+
   return;
 
 }
