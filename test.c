@@ -1,29 +1,42 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "rseq.h"
 
 int main() {
 
-  //  int phe = l2ip('F');
+  FILE *fp=0, *fpout=0;
+  int *seq=0, ntaxa, nsites, *pn=0;
+  char *names=0;
 
-  //printf("The value returned from l2ip() is: %d.\n", phe);
+  if ( !(fp = fopen("./sample_data/1052.rd5_h0.7.bmge.fasta", "r")) ) {
+    printf("FATAL: Failed to open the sequence file.\n");
+    exit(1);
+  }
 
-  FILE *fp;
-  int *seq, ntaxa, nsites, *pn;
-  char **names;
+  if ( !(fpout = fopen("./rseq.out", "w")) ) {
+    printf("FATAL: Failed to open the output file.\n");
+    exit(1);
+  }  
 
-  fp = fopen("./1052.rd5_h0.7.bmge.fasta", "r");
-
-  rseq_fasta(fp, &ntaxa, &nsites, seq=0, names=0, pn=0);
+  rseq_fasta(fp, &ntaxa, &nsites, &seq, &names, &pn);
 
   printf("Number of taxa: %d\n", ntaxa);
   printf("Number of sites: %d\n", nsites);
-  printf("Names:\n");
-  for (int i=0; i<ntaxa; i++) {
-    for (int j=0; j<pn[i]; j++) {
-      printf("%c",names[i][j]);
+
+  for (int i=0, p=0; i<ntaxa; p=pn[i], i++) {
+    fprintf(fpout, ">%.*s\n", pn[i]-p, names+p);
+    for (int j=0; j<nsites; j++) {
+      fprintf(fpout, "%c", ip2l(seq[j+i*nsites]));
     }
-    printf("\n");
+    fprintf(fpout, "\n");
   }
+
+  free(names);
+  free(seq);
+  free(pn);
+
+  fclose(fp);
+  fclose(fpout);
 
   return(0);
 

@@ -33,66 +33,102 @@ int l2ip(char c) {
   return (100);
 }
 
+char ip2l(int a) {
+  switch (a) {
+  case alanine:        return('A');
+  case arginine:       return('R');
+  case asparagine:     return('N');
+  case aspartic:       return('D');
+  case cysteine:       return('C');
+  case glutamine:      return('Q');
+  case glutamic:       return('E');
+  case glycine:        return('G');
+  case histidine:      return('H');
+  case isoleucine:     return('I');
+  case leucine:        return('L');
+  case lysine:         return('K');
+  case methionine:     return('M');
+  case phenylalanine:  return('F');
+  case proline:        return('P');
+  case serine:         return('S');
+  case threonine:      return('T');
+  case tryptophan:     return('W');
+  case tyrosine:       return('Y');
+  case valine:         return('V');
+  case 21:             return('-');
+  case 22:             return('X');
+  case 23:             return('?');
+  }
+
+  return('?');
+}
+
 void _fasta_ntaxa_nsites(FILE *seqfp, int *ntaxa, int *nsites) {
 
-  int nsitesp = 0;
   char cbuf;
 
   while( (cbuf = fgetc(seqfp)) != EOF ) {
     if ( cbuf == '>' ) {
       (*ntaxa)++;
-      if ( *ntaxa > 1 && !nsitesp ) {
-        nsitesp=1;
-      }
       while( (cbuf = fgetc(seqfp)) != '\n' );
     }
-    else if ( !(nsitesp) ) {
+    else if ( *ntaxa == 1 ) {
       if ( cbuf != '\n' && cbuf != '\r' ) {
         (*nsites)++;
-        printf("%d: %c\n", *nsites,cbuf);
       }
     }
   }
+
+  rewind(seqfp);
 }
 
 /*
- * seq: Allocate nsites*ntaxa spaces based on seqfile: seq[i + j*nsites].
- *      The amino acid value for site i species j comes from l2ip().
+ * Read a fasta alignment from the file pointed to by seqfp and store it in seq.
+ * Amino acid values are determined from l2ip().  To retrieve the amino acid
+ * at site i of species j, use seq[i + j*nsites].
  *
- * pn: Length ntaxa.  pnames[j] gives position of the last character for species j.
+ * names:
+ * pn: pn[j] gives length+1 of name[j], the name for species j
+
+ * Allocated:
+ *   seq: nsites*ntaxa chars
+ *   names:
+ *   pn:
+ *
+
  */
-void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int *seq,
-                char **names, int *pn) {
-  char cbuf;
-  char lbuf[LBUFLEN];
-  int curseq=0;
-  int seqi=0;
+void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
+                char **names, int **pn) {
+  char cbuf, lbuf[LBUFLEN];
+  int curseq=0, seqi=0, npi=0;
 
   *ntaxa = *nsites = 0;
 
   _fasta_ntaxa_nsites(seqfp, ntaxa, nsites);
-  names = malloc(*ntaxa*sizeof(char));
-  seq = malloc((*nsites)*(*ntaxa)*sizeof(char));
-  pn = malloc(*ntaxa*sizeof(int));
 
-  rewind(seqfp);
+  *names = malloc(*ntaxa * sizeof(char));
+  *seq = malloc((*nsites)*(*ntaxa) * sizeof(int));
+  *pn = malloc(*ntaxa * sizeof(int));
 
   while( (cbuf = fgetc(seqfp)) != EOF ) {
-    if ( cbuf == '>' ) {
+    if ( cbuf == '>' ) { // read sequence identifier line
 
-      if (seqi) { // there is a sequence in the buffer
+      if (seqi) { // the previous sequence is in lbuf
         for(int i=0; i<seqi; i++) {
-          seq[curseq*(*nsites)+i] = lbuf[i];
+          (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
         }
         seqi=0;
+        curseq++;
       }
 
-      fgets(lbuf, LBUFLEN, seqfp);
-      names[curseq] = malloc(strlen(lbuf)*sizeof(char));
-      strncpy(names[curseq],lbuf,LBUFLEN);
-      pn[curseq++] = strnlen(lbuf,LBUFLEN);
-    } // cbuf == '>'
-    else {
+      if ( !fgets(lbuf, LBUFLEN, seqfp) ) { // read seq id into lbuf
+        printf("Error reading a sequence name.\n");
+      }
+      lbuf[strcspn(lbuf, "\r\n")] = 0;
+      strcpy((*names)+npi, lbuf);
+      npi+=strlen(lbuf);
+      (*pn)[curseq] = npi;
+    } else { // read sequence
       if ( cbuf != '\n' && cbuf != '\r' ) {
         if (seqi < LBUFLEN) {
           lbuf[seqi++] = cbuf;
@@ -103,12 +139,15 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int *seq,
       }
     }
   }
+  for(int i=0; i<seqi; i++) {
+    (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
+  }
 
   return;
 }
 
-void rseq_rphy(FILE *seqfile, int *ntaxa, int *nsites, int *seq, char *names[],
-               int *pn) {
+void rseq_rphy(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
+               int **pn) {
   return;
 
 }

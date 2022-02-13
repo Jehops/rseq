@@ -27,11 +27,12 @@ enum {
 
 int l2ip(char c);
 
+char ip2l(int a);
+
 void _fasta_ntaxa_nsite(FILE *seqfp, int *ntaxa, int *nsites);
 
-void rseq_fasta(FILE *seqfile, int *ntaxa, int *nsites, int *seq,
-                char **names, int *pn);
+void rseq_fasta(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
+                int **pn);
 
-void rseq_rphy(FILE *seqfile, int *nsites, int *ntaxa, int *seq,
-               char *names[], int *pn);
-
+void rseq_rphy(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
+               int **pn);
