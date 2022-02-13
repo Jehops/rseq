@@ -90,30 +90,32 @@ void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl) {
 /*
  * Read a fasta alignment from the file pointed to by seqfp and store it in seq.
  * Amino acid values are determined from l2ip().  To retrieve the amino acid
- * at site i of species j, use seq[i + j*nsites].
+ * at site i for taxon j, use seq[i + j*nsites].
  *
- * names:
- * pn: pn[j] gives length+1 of name[j], the name for species j
-
- * Allocated:
+ * ntaxa: number of taxa
+ * nsites: number of aa sites
+ * seq: aa sequence data
+ * names: All taxon ids in a flat character array.
+ * pn: pn[i] gives the starting index for ith taxon id
+ *
+ * Allocated with caller responsibility to free:
  *   seq: nsites*ntaxa chars
- *   names:
- *   pn:
+ *   names: total length all taxon ids chars
+ *   pn: ntaxa+1 integers
  *
-
  */
 void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
                 char **names, int **pn) {
   char cbuf, lbuf[LBUFLEN];
-  int curseq=0, seqi=0, npi=0;
+  int curseq=0, seqi=0, npi=0, totnl=0;
 
   *ntaxa = *nsites = 0;
 
-  _fasta_ntaxa_nsites(seqfp, ntaxa, nsites);
+  _fasta_prescan(seqfp, ntaxa, nsites, &totnl);
 
-  *names = malloc(*ntaxa * sizeof(char));
+  *names = malloc(totnl+1 * sizeof(char));
   *seq = malloc((*nsites)*(*ntaxa) * sizeof(int));
-  *pn = malloc(*ntaxa * sizeof(int));
+  *pn = malloc( (*ntaxa+1) * sizeof(int));
 
   while( (cbuf = fgetc(seqfp)) != EOF ) {
     if ( cbuf == '>' ) { // read sequence identifier line
@@ -131,8 +133,8 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       }
       lbuf[strcspn(lbuf, "\r\n")] = 0;
       strcpy((*names)+npi, lbuf);
-      npi+=strlen(lbuf);
       (*pn)[curseq] = npi;
+      npi+=strlen(lbuf);
     } else { // read sequence
       if ( cbuf != '\n' && cbuf != '\r' ) {
         if (seqi < LBUFLEN) {
