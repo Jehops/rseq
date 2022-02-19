@@ -97,15 +97,18 @@ void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl) {
  * seq: aa sequence data
  * names: All taxon ids in a flat character array.
  * pn: pn[i] gives the starting index for ith taxon id
+ * inames: integer taxon ids (string 10 characters long padded with blanks)
  *
  * Allocated with caller responsibility to free:
  *   seq: nsites*ntaxa chars
  *   names: total length all taxon ids chars
  *   pn: ntaxa+1 integers
+ *   inames: ntaxa * (char*)[11]
  *
  */
 void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
-                char **names, int **pn) {
+                char **names, int **pn, char (**inames)[11]) {
+
   char cbuf, lbuf[LBUFLEN];
   int curseq=0, seqi=0, npi=0, totnl=0;
 
@@ -113,9 +116,10 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
 
   _fasta_prescan(seqfp, ntaxa, nsites, &totnl);
 
-  *names = malloc(totnl+1 * sizeof(char));
-  *seq = malloc((*nsites)*(*ntaxa) * sizeof(int));
-  *pn = malloc( (*ntaxa+1) * sizeof(int));
+  *names = malloc((totnl+1)*sizeof(**names));
+  *seq = malloc((*nsites)*(*ntaxa)*sizeof(**seq));
+  *pn = malloc((*ntaxa+1)*sizeof(**pn));
+  *inames = malloc(*ntaxa*sizeof((*inames)[11]));
 
   while( (cbuf = fgetc(seqfp)) != EOF ) {
     if ( cbuf == '>' ) { // read sequence identifier line
@@ -135,6 +139,11 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       strcpy((*names)+npi, lbuf);
       (*pn)[curseq] = npi;
       npi+=strlen(lbuf);
+      snprintf(lbuf, 10, "%d", curseq);
+      strlcpy((*inames)[curseq],lbuf,10);
+      for (int i=strlen((*inames)[curseq]); i<10; i++)
+        (*inames)[curseq][i] = ' ';
+      (*inames)[curseq][10] = '\0';
     } else { // read sequence
       if ( cbuf != '\n' && cbuf != '\r' ) {
         if (seqi < LBUFLEN) {
@@ -164,15 +173,17 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
  * seq: aa sequence data
  * names: All taxon ids in a flat character array.
  * pn: pn[i] gives the starting index for ith taxon id
-
+ * inames: integer taxon ids (string 10 characters long padded with blanks)
+ *
  * Allocated with caller responsibility to free:
  *   seq: nsites*ntaxa chars
  *   names: total length all taxon ids chars
  *   pn: ntaxa+1 integers
+ *   inames: ntaxa * (char*)[11]
  *
  */
 void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
-               char **names, int **pn) {
+               char **names, int **pn, char (**inames)[11]) {
 
   char cbuf, lbuf[LBUFLEN];
   char **tnames = 0; // temporary names array
@@ -183,14 +194,15 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     return;
   }
 
-  tnames = malloc((*ntaxa) * sizeof(char*));
-  *seq = malloc((*nsites)*(*ntaxa) * sizeof(int));
-  *pn = malloc( (*ntaxa+1) * sizeof(int));
+  tnames = malloc((*ntaxa)*sizeof(char*));
+  *seq = malloc((*nsites)*(*ntaxa)*sizeof(int));
+  *pn = malloc((*ntaxa+1)*sizeof(int));
+  *inames = malloc(*ntaxa*sizeof((*inames)[11]));
 
   for (int j=0, namel=0; j<*ntaxa; j++) {
     fscanf(seqfp, "%s", lbuf); // taxon id
     namel = strlen(lbuf);
-    tnames[j] = malloc(namel+1 * sizeof(char));
+    tnames[j] = malloc((namel+1)*sizeof(char));
     tnamel+=namel;
     strcpy(tnames[j], lbuf);
 
@@ -204,12 +216,18 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     }
   }
 
-  *names = malloc(tnamel+1 * sizeof(char));
+  *names = malloc((tnamel+1)*sizeof(**names));
   for (int j=0; j<*ntaxa; j++) {
     strcpy((*names)+npi, tnames[j]);
     (*pn)[j] = npi;
     npi+=strlen(tnames[j]);
     free(tnames[j]);
+
+    snprintf(lbuf, 10, "%d", j);
+    strlcpy((*inames)[j],lbuf,10);
+    for (int i=strlen((*inames)[j]); i<10; i++)
+      (*inames)[j][i] = ' ';
+    (*inames)[j][10] = '\0';
   }
   (*pn)[*ntaxa] = npi;
 

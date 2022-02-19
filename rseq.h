@@ -32,7 +32,7 @@ char ip2l(int a);
 void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl);
 
 void rseq_fasta(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
-                int **pn);
+                int **pn, char (**inames)[11]);
 
 void rseq_rphy(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
-               int **pn);
+               int **pn, char (**inames)[11]);
