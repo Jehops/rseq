@@ -122,9 +122,9 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   *inames = malloc(*ntaxa*sizeof((*inames)[11]));
 
   while( (cbuf = fgetc(seqfp)) != EOF ) {
-    if ( cbuf == '>' ) { // read sequence identifier line
+    if ( cbuf == '>' ) { /* read sequence identifier line */
 
-      if (seqi) { // the previous sequence is in lbuf
+      if (seqi) { /* the previous sequence is in lbuf */
         for(int i=0; i<seqi; i++) {
           (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
         }
@@ -132,7 +132,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
         curseq++;
       }
 
-      if ( !fgets(lbuf, LBUFLEN, seqfp) ) { // read seq id into lbuf
+      if ( !fgets(lbuf, LBUFLEN, seqfp) ) { /* read seq id into lbuf */
         printf("Error reading a sequence name.\n");
       }
       lbuf[strcspn(lbuf, "\r\n")] = 0;
@@ -144,7 +144,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       for (int i=strlen((*inames)[curseq]); i<10; i++)
         (*inames)[curseq][i] = ' ';
       (*inames)[curseq][10] = '\0';
-    } else { // read sequence
+    } else { /* read sequence */
       if ( cbuf != '\n' && cbuf != '\r' ) {
         if (seqi < LBUFLEN) {
           lbuf[seqi++] = cbuf;
@@ -186,8 +186,8 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
                char **names, int **pn, char (**inames)[11]) {
 
   char cbuf, lbuf[LBUFLEN];
-  char **tnames = 0; // temporary names array
-  int i = 0, tnamel = 0, npi=0; // tnamel: total name length
+  char **tnames = 0; /* temporary names array */
+  int i = 0, tnamel = 0, npi=0; /* tnamel: total name length */
 
   if (fscanf(seqfp, "%d %d", ntaxa, nsites) != 2) {
     printf("FATAL: Failed to read the phylip header.\n");
@@ -200,13 +200,13 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   *inames = malloc(*ntaxa*sizeof((*inames)[11]));
 
   for (int j=0, namel=0; j<*ntaxa; j++) {
-    fscanf(seqfp, "%s", lbuf); // taxon id
+    fscanf(seqfp, "%s", lbuf); /* taxon id */
     namel = strlen(lbuf);
     tnames[j] = malloc((namel+1)*sizeof(char));
     tnamel+=namel;
     strcpy(tnames[j], lbuf);
 
-    // sequence
+    /* sequence */
     i=0;
     while( (cbuf = fgetc(seqfp)) != '\n' ) {
       if( ! isspace(cbuf) ) {
@@ -234,5 +234,77 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   free(tnames);
 
   return;
-
 }
+
+/* We are after a '(' or ',' while reading a Newick tree. */
+int afterpc(const char *tree, const int pos) {
+  int i;
+
+  if (pos == 0) return 1;
+
+  for(i=pos-1; i>=0; i--) {
+    if ( tree[i] == '(' || tree[i] == ',' )
+      return 1;
+    else if ( isspace(tree[i]) )
+      ;
+    else
+      return 0;
+  }
+  return 1;
+}
+
+void itree(FILE *treefp, char **itree, const char *names, const int *pn) {
+
+  unsigned int ttl = 0;
+  int  i, j, ridp; /* ridp : reading id predicate */
+  char cbuf, *ntree = 0, nbuff[LBUFLEN];
+  int id=0;
+
+  while( (fgetc(treefp)) != EOF ) ttl++;
+  rewind(treefp);
+
+  ntree = malloc(ttl*sizeof(*ntree)+1);
+
+  i=0;
+  while( (cbuf = fgetc(treefp)) != EOF ) {
+    ntree[i++] = cbuf;
+  }
+  ntree[i] = '\0';
+
+  ridp=0;
+  for (i=0; i<ttl; i++) {
+    if ( !isspace(ntree[i]) && ntree[i] != ':' && ntree[i] != ';' && ntree[i] != '(' && ntree[i] != ')' && ntree[i] != '[' && ntree[i] != ']') {
+
+      if (!ridp) {
+        if (afterpc(ntree, i)) {
+          ridp=1;
+          j=0;
+          nbuff[j++] = ntree[i];
+        } else { /* This is not part of a taxon id */
+          printf("%c", ntree[i]);
+        }
+      } else {
+        nbuff[j++] = ntree[i];
+      }
+    } else {
+      if (ridp) { /* done reading a taxon id */
+        nbuff[j++] = '\0';
+        printf("%d", id++);
+        ridp = 0;
+      }
+      printf("%c", ntree[i]);
+    }
+  }
+
+  free(ntree);
+
+  return;
+}
+
+/* void ntree(FILE *treefp, char **itree, const char *names, const int *pn) { */
+
+/*   char cbuf, lbuf[LBUFLEN]; */
+/*   char **tnames = 0; /\* temporary names array *\/ */
+/*   int i = 0, tnamel = 0, npi=0; /\* tnamel: total name length *\/ */
+
+/* } */

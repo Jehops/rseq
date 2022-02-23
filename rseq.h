@@ -36,3 +36,5 @@ void rseq_fasta(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
 
 void rseq_rphy(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
                int **pn, char (**inames)[11]);
+
+void itree(FILE *treefp, char **itree, const char *names, const int *pn);
