@@ -140,7 +140,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       (*pn)[curseq] = npi;
       npi+=strlen(lbuf);
       snprintf(lbuf, 10, "%d", curseq);
-      strlcpy((*inames)[curseq],lbuf,10);
+      strcpy((*inames)[curseq],lbuf);
       for (int i=strlen((*inames)[curseq]); i<10; i++)
         (*inames)[curseq][i] = ' ';
       (*inames)[curseq][10] = '\0';
@@ -224,7 +224,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     free(tnames[j]);
 
     snprintf(lbuf, 10, "%d", j);
-    strlcpy((*inames)[j],lbuf,10);
+    strcpy((*inames)[j],lbuf);
     for (int i=strlen((*inames)[j]); i<10; i++)
       (*inames)[j][i] = ' ';
     (*inames)[j][10] = '\0';
