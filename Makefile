@@ -1,5 +1,6 @@
 CC=		clang13
 #CC=		gcc10
+#CC=		gcc
 CFLAGS=		-g -I.
 LDFLAGS=
 
