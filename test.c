@@ -86,7 +86,6 @@ int main() {
 
   cleanup(fp, fpout, seq, names, pn, inames);
   free(tree);
-  fclose(fp);
 
   return(0);
 }
