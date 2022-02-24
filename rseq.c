@@ -236,7 +236,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   return;
 }
 
-/* We are after a '(' or ',' while reading a Newick tree. */
+/* Is char at tree[pos] after  a '(' or ','? */
 int afterpc(const char *tree, const int pos) {
   int i;
 
@@ -253,58 +253,84 @@ int afterpc(const char *tree, const int pos) {
   return 1;
 }
 
-void itree(FILE *treefp, char **itree, const char *names, const int *pn) {
+/* Is c a character that could be part of a taxon id? */
+int idchar(char c) {
+  if ( !isspace(c) && c != ':' && c != ';' && c != '(' && c != ')' && c != '['
+       && c != ']')
+    return 1;
+  return 0;
+}
 
-  unsigned int ttl = 0;
-  int  i, j, ridp; /* ridp : reading id predicate */
+int idatpos(const int *pn, const int ntaxa, const int pos) {
+  int i;
+
+  for (i=0; i<ntaxa; i++) {
+    if (pn[i] == pos)
+      return i;
+  }
+
+  return -1;
+}
+
+/*
+ * Read a Newick tree from the file pointed to by treefp and store and replace
+ * the taxon ids with ids that are integers determined from names and pn.
+ *
+ * itree: integer id tree
+ * names: All taxon ids in a flat character array.
+ * pn: pn[i] gives the starting index for ith taxon id
+ * ntaxa: number of taxa
+ *
+ * Allocated with caller responsibility to free:
+ *   itree
+ *
+ */
+void itree(FILE *treefp, char **itree, const char *names, const int *pn,
+           const int ntaxa) {
+
+  unsigned int ttl = 0; /* ttl is total tree length */
+  int  i, id, j, k, pos, ridf; /* ridf is reading id flag */
   char cbuf, *ntree = 0, nbuff[LBUFLEN];
-  int id=0;
 
+  /* read in the tree */
   while( (fgetc(treefp)) != EOF ) ttl++;
-  rewind(treefp);
-
   ntree = malloc(ttl*sizeof(*ntree)+1);
-
+  *itree = malloc(ttl*sizeof(**itree)+1);
+  rewind(treefp);
   i=0;
   while( (cbuf = fgetc(treefp)) != EOF ) {
     ntree[i++] = cbuf;
   }
   ntree[i] = '\0';
 
-  ridp=0;
+  k=0; ridf=0;
   for (i=0; i<ttl; i++) {
-    if ( !isspace(ntree[i]) && ntree[i] != ':' && ntree[i] != ';' && ntree[i] != '(' && ntree[i] != ')' && ntree[i] != '[' && ntree[i] != ']') {
-
-      if (!ridp) {
+    if ( idchar(ntree[i]) ) { /* ntree[i] could be part of an id */
+      if (!ridf) {
         if (afterpc(ntree, i)) {
-          ridp=1;
+          ridf=1;
           j=0;
           nbuff[j++] = ntree[i];
         } else { /* This is not part of a taxon id */
-          printf("%c", ntree[i]);
+          (*itree)[k++] = ntree[i];
         }
       } else {
         nbuff[j++] = ntree[i];
       }
     } else {
-      if (ridp) { /* done reading a taxon id */
+      if (ridf) { /* done reading a taxon id */
         nbuff[j++] = '\0';
-        printf("%d", id++);
-        ridp = 0;
+        pos = strstr(names, nbuff) - names;
+        id = idatpos(pn, ntaxa, pos);
+        k += sprintf((*itree)+k, "%d", id);
+        ridf = 0;
       }
-      printf("%c", ntree[i]);
+      (*itree)[k++] = ntree[i];
     }
   }
 
+  (*itree)[k] = '\0';
   free(ntree);
 
   return;
 }
-
-/* void ntree(FILE *treefp, char **itree, const char *names, const int *pn) { */
-
-/*   char cbuf, lbuf[LBUFLEN]; */
-/*   char **tnames = 0; /\* temporary names array *\/ */
-/*   int i = 0, tnamel = 0, npi=0; /\* tnamel: total name length *\/ */
-
-/* } */

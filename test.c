@@ -72,14 +72,20 @@ int main() {
   rseq_rphy(fp, &ntaxa, &nsites, &seq, &names, &pn, &inames);
   palign(fpout, 1, ntaxa, nsites, seq, names, pn, inames);
 
-  cleanup(fp, fpout, seq, names, pn, inames);
+  fclose(fp);
 
   /* test converting tree to one with digits for taxon ids */
   if ( !(fp = fopen("./sample_data/1052.rd5_lgc20.treefile", "r")) ) {
     printf("FATAL: Failed to open the tree file.\n");
     exit(1);
   }
-  itree(fp, &tree, names, pn);
+  itree(fp, &tree, names, pn, ntaxa);
+
+
+  printf("%s\n",tree);
+
+  cleanup(fp, fpout, seq, names, pn, inames);
+  free(tree);
   fclose(fp);
 
   return(0);
