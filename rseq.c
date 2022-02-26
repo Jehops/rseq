@@ -110,7 +110,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
                 char **names, int **pn, char (**inames)[11]) {
 
   char cbuf, lbuf[LBUFLEN];
-  int curseq=0, seqi=0, npi=0, totnl=0;
+  int curseq=0, npi=0, seqi=0, i, totnl=0;
 
   *ntaxa = *nsites = 0;
 

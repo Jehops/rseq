@@ -7,7 +7,7 @@
  * type 0: fasta
  * type 1: relaxed phylip
  */
-void palign(FILE *fp, int type, int ntaxa, int nsites, int* seq, char *names, \
+void palign(FILE *fp, int type, int ntaxa, int nsites, int* seq, char *names,
             int *pn, char (*inames)[11]) {
 
   int i, j;
