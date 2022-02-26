@@ -18,4 +18,4 @@ $(COMPONENTS:=.o):	$(COMPONENTS:=.c) $(COMPONENTS:=.h)
 
 .PHONY: clean
 clean:
-	rm -f ${PROG} *.o
+	rm -f ${PROG} *.o *.out
