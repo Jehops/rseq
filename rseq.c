@@ -87,24 +87,22 @@ void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl) {
   rewind(seqfp);
 }
 
-/*
- * Read a fasta alignment from the file pointed to by seqfp and store it in seq.
+/* Read a fasta alignment from the file pointed to by seqfp and store it in seq.
  * Amino acid values are determined from l2ip().  To retrieve the amino acid
  * at site i for taxon j, use seq[i + j*nsites].
  *
- * ntaxa: number of taxa
+ * ntaxa:  number of taxa
  * nsites: number of aa sites
- * seq: aa sequence data
- * names: All taxon ids in a flat character array.
- * pn: pn[i] gives the starting index for ith taxon id
+ * seq:    aa sequence data
+ * names:  all taxon ids in a flat character array
+ * pn:     pn[i] gives the starting index for ith taxon id
  * inames: integer taxon ids (string 10 characters long padded with blanks)
  *
  * Allocated with caller responsibility to free:
- *   seq: nsites*ntaxa chars
- *   names: total length all taxon ids chars
- *   pn: ntaxa+1 integers
- *   inames: ntaxa * (char*)[11]
- *
+ *         seq: nsites*ntaxa chars
+ *         names: total length all taxon ids chars
+ *         pn: ntaxa+1 integers
+ *         inames: ntaxa * (char*)[11]
  */
 void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
                 char **names, int **pn, char (**inames)[11]) {
@@ -163,24 +161,22 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   return;
 }
 
-/*
- * Read a relaxed phylip alignment from the file pointed to by seqfp and store
+/* Read a relaxed phylip alignment from the file pointed to by seqfp and store
  * it in seq.  Amino acid values are determined from l2ip().  To retrieve the
  * amino acid at site i for taxon j, use seq[i + j*nsites].
  *
- * ntaxa: number of taxa
+ * ntaxa:  number of taxa
  * nsites: number of aa sites
- * seq: aa sequence data
- * names: All taxon ids in a flat character array.
- * pn: pn[i] gives the starting index for ith taxon id
+ * seq:    aa sequence data
+ * names:  all taxon ids in a flat character array
+ * pn:     pn[i] gives the starting index for ith taxon id
  * inames: integer taxon ids (string 10 characters long padded with blanks)
  *
  * Allocated with caller responsibility to free:
- *   seq: nsites*ntaxa chars
- *   names: total length all taxon ids chars
- *   pn: ntaxa+1 integers
- *   inames: ntaxa * (char*)[11]
- *
+ *         seq: nsites*ntaxa chars
+ *         names: total length all taxon ids chars
+ *         pn: ntaxa+1 integers
+ *         inames: ntaxa * (char*)[11]
  */
 void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
                char **names, int **pn, char (**inames)[11]) {
@@ -275,18 +271,17 @@ int idatpos(const int *pn, const int ntaxa, const int pos) {
   return -1;
 }
 
-/*
- * Read a Newick tree from the file pointed to by treefp and store and replace
+/* Read a Newick tree from the file pointed to by treefp and store and replace
  * the taxon ids with ids that are integers determined from names and pn.
  *
  * itree: integer id tree
- * names: All taxon ids in a flat character array.
- * pn: pn[i] gives the starting index for ith taxon id
+ * names: All taxon ids in a flat character array. If null, set numeric id as
+ *        order encountered in tree.
+ * pn:    pn[i] gives the starting index for ith taxon id
  * ntaxa: number of taxa
  *
  * Allocated with caller responsibility to free:
- *   itree
- *
+ *        itree
  */
 void itree(FILE *treefp, char **itree, const char *names, const int *pn,
            const int ntaxa) {
