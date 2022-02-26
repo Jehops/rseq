@@ -9,15 +9,18 @@
  */
 void palign(FILE *fp, int type, int ntaxa, int nsites, int* seq, char *names, \
             int *pn, char (*inames)[11]) {
+
+  int i, j;
+
   if (type==1)
     fprintf(fp, "%d %d\n", ntaxa, nsites);
 
-  for (int j=0; j<ntaxa; j++) {
+  for (j=0; j<ntaxa; j++) {
     if (type==0)
       fprintf(fp, ">%.*s (%s)\n", pn[j+1]-pn[j], names+pn[j], inames[j]);
     else
       fprintf(fp, "%.*s (%s) ", pn[j + 1] - pn[j], names + pn[j], inames[j]);
-    for (int i=0; i<nsites; i++)
+    for (i=0; i<nsites; i++)
       fprintf(fp, "%c", ip2l(seq[i+j*nsites]));
     fprintf(fp, "\n");
   }
@@ -44,7 +47,7 @@ int main() {
   int *seq=0, ntaxa, nsites, *pn=0;
   char *names=0, (*inames)[11], *tree=0;
 
-  // test fasta
+  /* test fasta */
   if ( !(fp = fopen("./sample_data/1052.rd5_h0.7.bmge.fasta", "r")) ) {
     printf("FATAL: Failed to open the fasta sequence file.\n");
     exit(1);
@@ -59,7 +62,7 @@ int main() {
 
   cleanup(fp, fpout, seq, names, pn, inames);
 
-  // test relaxed phylip
+  /* test relaxed phylip */
   if ( !(fp = fopen("./sample_data/1052.rd5_h0.7.bmge.phy", "r")) ) {
     printf("FATAL: Failed to open the phylip sequence file.\n");
     exit(1);
@@ -73,6 +76,7 @@ int main() {
   palign(fpout, 1, ntaxa, nsites, seq, names, pn, inames);
 
   fclose(fp);
+  fclose(fpout);
 
   /* test converting tree to one with digits for taxon ids */
   if ( !(fp = fopen("./sample_data/1052.rd5_lgc20.treefile", "r")) ) {

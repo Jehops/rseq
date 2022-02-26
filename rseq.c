@@ -125,7 +125,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     if ( cbuf == '>' ) { /* read sequence identifier line */
 
       if (seqi) { /* the previous sequence is in lbuf */
-        for(int i=0; i<seqi; i++) {
+        for(i=0; i<seqi; i++) {
           (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
         }
         seqi=0;
@@ -141,7 +141,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       npi+=strlen(lbuf);
       snprintf(lbuf, 10, "%d", curseq);
       strcpy((*inames)[curseq],lbuf);
-      for (int i=strlen((*inames)[curseq]); i<10; i++)
+      for (i=strlen((*inames)[curseq]); i<10; i++)
         (*inames)[curseq][i] = ' ';
       (*inames)[curseq][10] = '\0';
     } else { /* read sequence */
@@ -155,7 +155,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       }
     }
   }
-  for(int i=0; i<seqi; i++) {
+  for(i=0; i<seqi; i++) {
     (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
   }
   (*pn)[++curseq] = npi;
@@ -187,7 +187,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
 
   char cbuf, lbuf[LBUFLEN];
   char **tnames = 0; /* temporary names array */
-  int i = 0, tnamel = 0, npi=0; /* tnamel: total name length */
+  int i, j, namel, npi=0, tnamel = 0; /* tnamel: total name length */
 
   if (fscanf(seqfp, "%d %d", ntaxa, nsites) != 2) {
     printf("FATAL: Failed to read the phylip header.\n");
@@ -217,7 +217,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   }
 
   *names = malloc((tnamel+1)*sizeof(**names));
-  for (int j=0; j<*ntaxa; j++) {
+  for (j=0; j<*ntaxa; j++) {
     strcpy((*names)+npi, tnames[j]);
     (*pn)[j] = npi;
     npi+=strlen(tnames[j]);
@@ -225,7 +225,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
 
     snprintf(lbuf, 10, "%d", j);
     strcpy((*inames)[j],lbuf);
-    for (int i=strlen((*inames)[j]); i<10; i++)
+    for (i=strlen((*inames)[j]); i<10; i++)
       (*inames)[j][i] = ' ';
     (*inames)[j][10] = '\0';
   }
@@ -322,7 +322,7 @@ void itree(FILE *treefp, char **itree, const char *names, const int *pn,
         nbuff[j++] = '\0';
         pos = strstr(names, nbuff) - names;
         id = idatpos(pn, ntaxa, pos);
-        k += sprintf((*itree)+k, "%d", id);
+        k += snprintf((*itree)+k, 10, "%d", id);
         ridf = 0;
       }
       (*itree)[k++] = ntree[i];
