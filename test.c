@@ -85,8 +85,11 @@ int main() {
   }
   itree(fp, &tree, names, pn, ntaxa);
 
-
-  printf("%s\n",tree);
+  if ( !(fpout = fopen("./rseq_itree.out", "w")) ) {
+    printf("FATAL: Failed to open the itree output file.\n");
+    exit(1);
+  }
+  fprintf(fpout, "%s\n", tree);
 
   cleanup(fp, fpout, seq, names, pn, inames);
   free(tree);
