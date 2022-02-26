@@ -324,6 +324,13 @@ void itree(FILE *treefp, char **itree, const char *names, const int *pn,
         nbuff[j++] = '\0';
         if (names != 0) { /* use names to get the numeric id */
           pos = strstr(names, nbuff) - names;
+          if (pos < 0) {
+            printf("%s:%d: There was an error retrieving the taxon name %s.\n",
+                   __FILE__, __LINE__, nbuff);
+            free(ntree); ntree = 0;
+            free(*itree); *itree = 0;
+            return;
+          }
           id = idatpos(pn, ntaxa, pos);
           k += snprintf((*itree)+k, 10, "%d", id);
         } else { /* set numeric ids as order encountered in tree */
