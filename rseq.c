@@ -133,7 +133,8 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       if ( !fgets(lbuf, LBUFLEN, seqfp) ) { /* read seq id into lbuf */
         printf("Error reading a sequence name.\n");
       }
-      lbuf[strcspn(lbuf, "\r\n")] = 0;
+      lbuf[strcspn(lbuf, " ")] = '\0';
+      lbuf[strcspn(lbuf, "\r\n")] = '\0';
       strcpy((*names)+npi, lbuf);
       (*pn)[curseq] = npi;
       npi+=strlen(lbuf);
