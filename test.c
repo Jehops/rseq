@@ -34,18 +34,20 @@ void cleanup(FILE *fp, FILE *fpout, int *seq, char *names, int *pn, \
   fclose(fp);
   fclose(fpout);
 
-  free(seq);
-  free(names);
-  free(pn);
-  free(inames);
+  if (seq) free(seq);
+  if (names) free(names);
+  if (pn) free(pn);
+  if (inames) free(inames);
 }
 
 
 int main() {
 
-  FILE *fp=0, *fpout=0;
-  int *seq=0, ntaxa, nsites, *pn=0;
-  char *names=0, (*inames)[11], *tree=0;
+  FILE *fp, *fpout;
+  int *seq, ntaxa, nsites, *pn;
+  char *names, (*inames)[11], *tree;
+
+  fp = 0; fpout = 0; seq = 0; names = 0; tree = 0;
 
   /* test fasta */
   if ( !(fp = fopen("./sample_data/1052.rd5_h0.7.bmge.fasta", "r")) ) {
@@ -89,10 +91,12 @@ int main() {
     printf("FATAL: Failed to open the itree output file.\n");
     exit(1);
   }
-  fprintf(fpout, "%s\n", tree);
+  if(tree) {
+    fprintf(fpout, "%s\n", tree);
+  }
 
   cleanup(fp, fpout, seq, names, pn, inames);
-  free(tree);
+  if (tree) free(tree);
 
   return(0);
 }
