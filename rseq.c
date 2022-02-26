@@ -301,7 +301,7 @@ void itree(FILE *treefp, char **itree, const char *names, const int *pn,
   }
   ntree[i] = '\0';
 
-  k=0; ridf=0;
+  id=0; k=0; ridf=0;
   for (i=0; i<ttl; i++) {
     if ( idchar(ntree[i]) ) { /* ntree[i] could be part of an id */
       if (!ridf) {
@@ -318,9 +318,13 @@ void itree(FILE *treefp, char **itree, const char *names, const int *pn,
     } else {
       if (ridf) { /* done reading a taxon id */
         nbuff[j++] = '\0';
-        pos = strstr(names, nbuff) - names;
-        id = idatpos(pn, ntaxa, pos);
-        k += snprintf((*itree)+k, 10, "%d", id);
+        if (names != 0) { /* use names to get the numeric id */
+          pos = strstr(names, nbuff) - names;
+          id = idatpos(pn, ntaxa, pos);
+          k += snprintf((*itree)+k, 10, "%d", id);
+        } else { /* set numeric ids as order encountered in tree */
+          k += snprintf((*itree)+k, 10, "%d", id++);
+        }
         ridf = 0;
       }
       (*itree)[k++] = ntree[i];
