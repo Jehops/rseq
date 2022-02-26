@@ -189,7 +189,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   char **tnames = 0; /* temporary names array */
   int i, j, namel, npi=0, tnamel = 0; /* tnamel: total name length */
 
-  if (fscanf(seqfp, "%d %d", ntaxa, nsites) != 2) {
+  if ( fscanf(seqfp, "%d %d", ntaxa, nsites) != 2 ) {
     printf("FATAL: Failed to read the phylip header.\n");
     return;
   }
@@ -199,8 +199,11 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   *pn = malloc((*ntaxa+1)*sizeof(int));
   *inames = malloc(*ntaxa*sizeof((*inames)[11]));
 
-  for (int j=0, namel=0; j<*ntaxa; j++) {
-    fscanf(seqfp, "%s", lbuf); /* taxon id */
+  for (j=0, namel=0; j<*ntaxa; j++) {
+    if ( fscanf(seqfp, "%s", lbuf) != 1 ) { /* taxon id */
+      printf("FATAL: Failed to read a taxon id.\n");
+      return;
+    }
     namel = strlen(lbuf);
     tnames[j] = malloc((namel+1)*sizeof(char));
     tnamel+=namel;
