@@ -25,9 +25,11 @@ enum {
   valine
 };
 
+/* letter two integer protein */
 int l2ip(char c);
 
-char ip2l(int a);
+/* integer to letter protein */
+char i2lp(int a);
 
 void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl);
 

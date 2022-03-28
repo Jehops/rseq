@@ -34,7 +34,7 @@ int l2ip(char c) {
   return (100);
 }
 
-char ip2l(int a) {
+char i2lp(int a) {
   switch (a) {
   case alanine:        return('A');
   case arginine:       return('R');
