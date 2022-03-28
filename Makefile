@@ -1,21 +1,20 @@
-CC=		clang13
+#CC=		clang13
 #CC=		gcc10
-#CC=		gcc
-CFLAGS=		-g -I.
-LDFLAGS=
+CC=		gcc
+CFLAGS=		-I. -ansi -Wall -DDEBUG -O0 -g
+LDFLAGS=	-lm
 
+COMPONENTS=	rseq ut2n_fn
 PROG=		test
-
-COMPONENTS=	rseq
 
 all:		${PROG}
 
 ${PROG}:	${PROG}.c $(COMPONENTS:=.o) $(COMPONENTS:=.h)
-		${CC} -Wall -O0 ${CFLAGS} ${LDFLAGS} $(COMPONENTS:=.o) ${PROG}.c -o $@
+		${CC} ${CFLAGS} $(COMPONENTS:=.o) ${PROG}.c ${LDFLAGS} -o $@
 
 $(COMPONENTS:=.o):	$(COMPONENTS:=.c) $(COMPONENTS:=.h)
-		${CC} -Wall -O0 ${CFLAGS} ${LDFLAGS} -c $(COMPONENTS:=.c)
+		${CC} ${CFLAGS} -c $(COMPONENTS:=.c)
 
 .PHONY: clean
 clean:
-	rm -f ${PROG} *.o *.out
+	rm -f ${PROGS} *.o out/*
