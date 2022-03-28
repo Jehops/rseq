@@ -137,7 +137,8 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
       strcpy((*names)+npi, lbuf);
       (*pn)[curseq] = npi;
       npi+=strlen(lbuf);
-      snprintf(lbuf, 10, "%d", curseq);
+      if ( sprintf(lbuf, "%d", curseq) > 9 )
+        printf("%s:%d: Buffer overflow.\n", __FILE__, __LINE__-1);
       strcpy((*inames)[curseq],lbuf);
       for (i=strlen((*inames)[curseq]); i<10; i++)
         (*inames)[curseq][i] = ' ';
@@ -148,7 +149,7 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
           lbuf[seqi++] = cbuf;
         }
         else {
-          printf("Buffer overflow\n");
+          printf("Buffer overflow.\n");
         }
       }
     }
@@ -226,7 +227,8 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     npi+=strlen(tnames[j]);
     free(tnames[j]);
 
-    snprintf(lbuf, 10, "%d", j);
+    if ( sprintf(lbuf, "%d", j) > 9 )
+      printf("%s:%d: Buffer overflow.\n", __FILE__, __LINE__-1);
     strcpy((*inames)[j],lbuf);
     for (i=strlen((*inames)[j]); i<10; i++)
       (*inames)[j][i] = ' ';
@@ -290,8 +292,8 @@ int idatpos(const int *pn, const int ntaxa, const int pos) {
 void itree(FILE *treefp, char **itree, const char *names, const int *pn,
            const int ntaxa) {
 
-  unsigned int ttl = 0; /* ttl is total tree length */
-  int  i, id, j, k, pos, ridf; /* ridf is reading id flag */
+  int ttl = 0; /* ttl is total tree length */
+  int  i, id, j, k, l, pos, ridf; /* ridf is reading id flag */
   char cbuf, *ntree = 0, nbuff[LBUFLEN];
 
   /* read in the tree */
@@ -332,9 +334,13 @@ void itree(FILE *treefp, char **itree, const char *names, const int *pn,
             return;
           }
           id = idatpos(pn, ntaxa, pos);
-          k += snprintf((*itree)+k, 10, "%d", id);
+          l = sprintf((*itree)+k,"%d", id);
+          if (l>9) printf("%s:%d: Buffer overflow.\n", __FILE__, __LINE__-1);
+          k += l;
         } else { /* set numeric ids as order encountered in tree */
-          k += snprintf((*itree)+k, 10, "%d", id++);
+          l = sprintf((*itree)+k, "%d", id++);
+          if (l>9) printf("%s:%d: Buffer overflow.\n", __FILE__, __LINE__-1);
+          k += l;
         }
         ridf = 0;
       }
