@@ -1,6 +1,7 @@
-#CC=		clang13
+CC=		cc
+#CC=		clang
 #CC=		gcc10
-CC=		gcc
+#CC=		gcc
 CFLAGS=		-I. -ansi -Wall -DDEBUG -O0 -g
 LDFLAGS=	-lm
 
