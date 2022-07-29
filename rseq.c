@@ -225,7 +225,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     strcpy((*names)+npi, tnames[j]);
     (*pn)[j] = npi;
     npi+=strlen(tnames[j]);
-    free(tnames[j]);
+    free(tnames[j]); tnames[j]=0;
 
     if ( sprintf(lbuf, "%d", j) > 9 )
       printf("%s:%d: Buffer overflow.\n", __FILE__, __LINE__-1);
@@ -236,7 +236,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   }
   (*pn)[*ntaxa] = npi;
 
-  free(tnames);
+  free(tnames); tnames=0;
 
   return;
 }
@@ -329,7 +329,7 @@ void itree(FILE *treefp, char **itree, const char *names, const int *pn,
           if (pos < 0) {
             printf("%s:%d: There was an error retrieving the taxon name %s.\n",
                    __FILE__, __LINE__, nbuff);
-            free(ntree); ntree = 0;
+            free(ntree);  ntree = 0;
             free(*itree); *itree = 0;
             return;
           }
@@ -349,7 +349,7 @@ void itree(FILE *treefp, char **itree, const char *names, const int *pn,
   }
 
   (*itree)[k] = '\0';
-  free(ntree);
+  free(ntree); ntree=0;
 
   return;
 }
