@@ -29,7 +29,7 @@ int ndig_intpart(double f) {
 /* NOTE: names changed: `excess' space removed from names */
 char *ut2in_rf(int numsp, double *utreec, char *names, int *pn, char **ilabels) {
 
-  char **tstring,*tstr;
+  char **tstring=0,*tstr=0;
   double x;
   int i, len, r, l;
   /* int alen; Only when alen in front of all sprintf() calls */
@@ -108,16 +108,16 @@ char *ut2in_rf(int numsp, double *utreec, char *names, int *pn, char **ilabels) 
     sprintf(tstr,"(%s,%s:%.5f);",tstring[2*numsp-3],tstring[r],x);
   tstr[len-1] = '\0';
   /* printf("%i %i %i %s\n",r,len,alen+1,tstr); */
-  for(i = 0; i < 2*numsp-2; i++) free(tstring[i]);
+  for(i = 0; i < 2*numsp-2; i++) { free(tstring[i]); tstring[i]=0; }
 
-  free(tstring);
+  free(tstring); tstring=0;
   return(tstr);
 }
 
 /*= convert utreec (new) to Newick format */
 void ut2n_rf(int numsp, double *utreec, char *names, int *pn, char *tstr) {
 
-  char **tstring;
+  char **tstring=0;
   int i,len,r,l;
 
   tstring = malloc((2*numsp-2)*sizeof(*tstring));
@@ -149,14 +149,14 @@ void ut2n_rf(int numsp, double *utreec, char *names, int *pn, char *tstr) {
           utreec[2+(numsp-2)*4]+utreec[3+(numsp-2)*4]);
   len = strlen(tstr);
   tstr[len] = '\0';
-  for(i = 0; i < 2*numsp-2; i++) free(tstring[i]);
-  free(tstring);
+  for(i = 0; i < 2*numsp-2; i++) { free(tstring[i]); tstring[i]=0; }
+  free(tstring); tstring=0;
 }
 
 /*= convert utreec (new) to Newick format, topology only */
 void ut2nt_rf(int numsp, double *utreec, char *names, int *pn, char *tstr) {
 
-  char **tstring;
+  char **tstring=0;
   int i,len,r,l;
 
   tstring = malloc((2*numsp-2)*sizeof(*tstring));
@@ -185,15 +185,15 @@ void ut2nt_rf(int numsp, double *utreec, char *names, int *pn, char *tstr) {
   sprintf(tstr,"(%s,%s);",tstring[2*numsp-3],tstring[r]);
   len = strlen(tstr);
   tstr[len] = '\0';
-  for(i = 0; i < 2*numsp-2; i++) free(tstring[i]);
-  free(tstring);
+  for(i = 0; i < 2*numsp-2; i++) { free(tstring[i]); tstring[i]=0; }
+  free(tstring); tstring=0;
 }
 
 /*=pr_tstr_labels: newick tree with utreec internal edges labeled */
 void pr_tstr_labels(FILE *otreefile, int ntaxa, double *utreec, 
 		    char *names, int *pn) {
   
-  char **ilabels,*tstr;
+  char **ilabels=0,*tstr=0;
   int i,elab,len;
 
   ilabels = malloc((ntaxa-2)*sizeof(*ilabels));
@@ -207,6 +207,6 @@ void pr_tstr_labels(FILE *otreefile, int ntaxa, double *utreec,
   tstr=ut2in_rf(ntaxa,utreec,names,pn,ilabels);
   fprintf(otreefile,"%s\n", tstr);
 
-  for(i=0; i<ntaxa-2; i++) free(ilabels[i]);
-  free(ilabels); free(tstr);
+  for(i=0; i<ntaxa-2; i++) { free(ilabels[i]); ilabels[i]=0; }
+  free(ilabels); ilabels=0; free(tstr); tstr=0;
 }
