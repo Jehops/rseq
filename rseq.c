@@ -4,6 +4,29 @@
 
 #include "rseq.h"
 
+int l2i(char c) {
+  if (c == 'a' || c == 'A') return(0);
+  if (c == 'c' || c == 'C') return(1);
+  if (c == 'g' || c == 'G') return(2);
+  if (c == 't' || c == 'T') return(3);
+  if (c == '-')             return(4);
+
+  return(5);
+}
+
+char i2l(int i) {
+  switch(i) {
+  case 0: return('A');
+  case 1: return('C');
+  case 2: return('G');
+  case 3: return('T');
+  case 4: return('-');
+  }
+
+  return('E');
+}
+
+
 int l2ip(char c) {
   switch (c) {
   case 'A': return (alanine);
@@ -87,9 +110,10 @@ void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl) {
   rewind(seqfp);
 }
 
-/* Read a fasta alignment from the file pointed to by seqfp and store it in seq.
- * Amino acid values are determined from l2ip().  To retrieve the amino acid
- * at site i for taxon j, use seq[i + j*nsites].
+/* Read a fasta alignment of either nucleotides or amino acids from the file
+ * pointed to by seqfp and store it in seq.  Nucleotide values are determined
+ * from l2i() and amino acid values are determined from l2ip().  To retrieve the
+ * amino acid at site i for taxon j, use seq[i + j*nsites].
  *
  * ntaxa:  number of taxa
  * nsites: number of aa sites
@@ -97,6 +121,7 @@ void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl) {
  * names:  all taxon ids in a flat character array
  * pn:     pn[i] gives the starting index for ith taxon id
  * inames: integer taxon ids (string 10 characters long padded with blanks)
+ * is_aa:  0 if working with nucleotides, 1 if working with amino acids
  *
  * Allocated with caller responsibility to free:
  *         seq: nsites*ntaxa chars
@@ -104,8 +129,8 @@ void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl) {
  *         pn: ntaxa+1 integers
  *         inames: ntaxa * (char*)[11]
  */
-void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
-                char **names, int **pn, char (**inames)[11]) {
+void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq, char **names,
+                int **pn, char (**inames)[11], int is_aa) {
 
   char cbuf, lbuf[LBUFLEN];
   int curseq=0, npi=0, seqi=0, i, totnl=0;
@@ -124,7 +149,11 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
 
       if (seqi) { /* the previous sequence is in lbuf */
         for(i=0; i<seqi; i++) {
-          (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
+          if (is_aa) {
+            (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
+          } else {
+            (*seq)[i + curseq*(*nsites)] = l2i(lbuf[i]);
+          }
         }
         seqi=0;
         curseq++;
@@ -155,23 +184,29 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     }
   }
   for(i=0; i<seqi; i++) {
-    (*seq)[i + curseq*(*nsites)] = l2ip(lbuf[i]);
+    if (is_aa) {
+      (*seq)[i + curseq * (*nsites)] = l2ip(lbuf[i]);
+    } else {
+      (*seq)[i + curseq * (*nsites)] = l2i(lbuf[i]);
+    }
   }
   (*pn)[++curseq] = npi;
 
   return;
 }
 
-/* Read a relaxed phylip alignment from the file pointed to by seqfp and store
- * it in seq.  Amino acid values are determined from l2ip().  To retrieve the
- * amino acid at site i for taxon j, use seq[i + j*nsites].
+/* Read a relaxed phylip alignment of either nucleotides or amino acids from the
+ * file pointed to by seqfp and store it in seq.  Nucleotide values are
+ * determined from l2i() and amino acid values are determined from l2ip().  To
+ * retrieve the amino acid at site i for taxon j, use seq[i + j*nsites].
  *
  * ntaxa:  number of taxa
  * nsites: number of aa sites
- * seq:    aa sequence data
+ * seq:    nucleotide or aa sequence data
  * names:  all taxon ids in a flat character array
  * pn:     pn[i] gives the starting index for ith taxon id
  * inames: integer taxon ids (string 10 characters long padded with blanks)
+ * is_aa:  0 if working with nucleotides, 1 if working with amino acids
  *
  * Allocated with caller responsibility to free:
  *         seq: nsites*ntaxa chars
@@ -179,8 +214,8 @@ void rseq_fasta(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
  *         pn: ntaxa+1 integers
  *         inames: ntaxa * (char*)[11]
  */
-void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
-               char **names, int **pn, char (**inames)[11]) {
+void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq, char **names,
+               int **pn, char (**inames)[11], int is_aa) {
 
   char cbuf, lbuf[LBUFLEN];
   char **tnames = 0; /* temporary names array */
@@ -214,7 +249,11 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
     i=0;
     while( (cbuf = fgetc(seqfp)) != '\n' ) {
       if( ! isspace(cbuf) ) {
-        (*seq)[i + j*(*nsites)] = l2ip(cbuf);
+        if (is_aa) {
+          (*seq)[i + j*(*nsites)] = l2ip(cbuf);
+        } else {
+          (*seq)[i + j*(*nsites)] = l2i(cbuf);
+        }
         i++;
       }
     }

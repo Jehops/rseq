@@ -25,7 +25,13 @@ enum {
   valine
 };
 
-/* letter two integer protein */
+/* letter to integer */
+int l2i(char c);
+
+/* integer to letter */
+char i2l(int i);
+
+/* letter to integer protein */
 int l2ip(char c);
 
 /* integer to letter protein */
@@ -34,10 +40,10 @@ char i2lp(int a);
 void _fasta_prescan(FILE *seqfp, int *ntaxa, int *nsites, int *totnl);
 
 void rseq_fasta(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
-                int **pn, char (**inames)[11]);
+                int **pn, char (**inames)[11], int is_aa);
 
-void rseq_rphy(FILE *seqfile, int *ntaxa, int *nsites, int **seq, char **names,
-               int **pn, char (**inames)[11]);
+void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq, char **names,
+               int **pn, char (**inames)[11], int is_aa);
 
 void itree(FILE *treefp, char **itree, const char *names, const int *pn,
            const int ntaxa);
