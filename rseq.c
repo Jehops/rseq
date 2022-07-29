@@ -199,9 +199,9 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq,
   for (j=0, namel=0; j<*ntaxa; j++) {
     if ( fscanf(seqfp, "%s", lbuf) != 1 ) { /* taxon id */
       printf("FATAL: Failed to read a taxon id.\n");
-      free(tnames); tnames = 0;
-      free(*seq); *seq = 0;
-      free(*pn); *pn = 0;
+      free(tnames);  tnames = 0;
+      free(*seq);    *seq = 0;
+      free(*pn);     *pn = 0;
       free(*inames); *inames = 0;
       return;
     }
