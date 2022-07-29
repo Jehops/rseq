@@ -280,7 +280,7 @@ void rseq_rphy(FILE *seqfp, int *ntaxa, int *nsites, int **seq, char **names,
   return;
 }
 
-/* Is char at tree[pos] after  a '(' or ','? */
+/* Is char at tree[pos] after a '(' or ','? */
 int afterpc(const char *tree, const int pos) {
   int i;
 
