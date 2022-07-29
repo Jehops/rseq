@@ -300,7 +300,7 @@ int afterpc(const char *tree, const int pos) {
 /* Is c a character that could be part of a taxon id? */
 int idchar(char c) {
   if ( !isspace(c) && c != ':' && c != ';' && c != '(' && c != ')' && c != '['
-       && c != ']')
+       && c != ']' && c != ',' )
     return 1;
   return 0;
 }
