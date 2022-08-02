@@ -1,7 +1,4 @@
 CC=		cc
-#CC=		clang
-#CC=		gcc10
-#CC=		gcc
 CFLAGS=		-I. -ansi -Wall -DDEBUG -O0 -g
 LDFLAGS=	-lm
 
@@ -18,4 +15,4 @@ $(COMPONENTS:=.o):	$(COMPONENTS:=.c) $(COMPONENTS:=.h)
 
 .PHONY: clean
 clean:
-	rm -f ${PROGS} *.o out/*
+	rm -f ${PROG} *.o out/*
